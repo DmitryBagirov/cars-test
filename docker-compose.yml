@@ -1,0 +1,61 @@
+version: '3'
+
+volumes:
+    db-volume:
+networks:
+    app-network:
+        driver: bridge
+
+
+services:
+  php:
+    container_name: php_${APP_NAME}
+    build:
+      context: docker/images/php/
+    depends_on:
+      - db
+    working_dir: /var/www
+    volumes:
+        - ./:/var/www
+    environment:
+        DB_PORT: ${DB_PORT:-5432}
+
+
+  nginx:
+    container_name: nginx_${APP_NAME}
+    image: nginx:alpine
+    ports:
+      - "127.0.0.1:80:80"
+    volumes:
+        - ./:/var/www:cached
+        - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
+        - ./docker/nginx/logs:/var/log/nginx
+    depends_on:
+        - php
+    networks:
+        - app-network
+
+
+  redis:
+      container_name: redis_${APP_NAME}
+      image: redis:6.0.8-alpine
+      ports:
+          - ${REDIS_PORT:-6379}:6379
+      networks:
+          - app-network
+
+
+  db:
+    container_name: db_${APP_NAME}
+    image: postgis/postgis:13-3.1-alpine
+    ports:
+      - "127.0.0.1:5432:5432"
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      PGDATA: /data/postgres
+    volumes:
+        - ./docker/database/init.sql:/docker-entrypoint-initdb.d/1-init.sql
+        - db-volume:/data/postgres
+    networks:
+        - app-network

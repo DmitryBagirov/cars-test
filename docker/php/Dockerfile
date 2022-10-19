@@ -1,5 +1,9 @@
 FROM php:8.1-fpm-alpine
 
+ARG PHP_INI_NAME
+
+RUN apk update
+
 # postgresql
 RUN set -ex && apk --no-cache add postgresql-dev
 RUN docker-php-ext-install pdo_pgsql
@@ -14,10 +18,18 @@ RUN docker-php-ext-install exif
 RUN apk add --no-cache $PHPIZE_DEPS && pecl install xdebug && docker-php-ext-enable xdebug
 
 # composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+COPY --from=composer /usr/bin/composer /usr/bin/composer
 
-ADD ./php.ini /usr/local/etc/php/conf.d/php.ini
-ADD ./ci.php.ini /usr/local/etc/php/conf.d/ci.php.ini
+RUN apk add imagemagick
+RUN apk add imagemagick-dev
 
-WORKDIR /var/www/project
+RUN apk add --update --no-cache autoconf g++ imagemagick-dev libtool make pcre-dev \
+    && pecl install imagick \
+    && docker-php-ext-enable imagick \
+    && apk del autoconf g++ libtool make pcre-dev
 
+COPY $PHP_INI_NAME /usr/local/etc/php/conf.d/40-custom.ini
+
+COPY run.sh /tmp
+
+ENTRYPOINT ["/tmp/run.sh","php-fpm","-F"]

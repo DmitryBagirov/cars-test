@@ -6,12 +6,13 @@ networks:
     app-network:
         driver: bridge
 
-
 services:
   php:
     container_name: php_${APP_NAME}
     build:
-      context: docker/images/php/
+      context: docker/php/
+      args:
+        PHP_INI_NAME: ${DOCKER_PHP_INI:-php.ini}
     depends_on:
       - db
     working_dir: /var/www
@@ -19,13 +20,15 @@ services:
         - ./:/var/www
     environment:
         DB_PORT: ${DB_PORT:-5432}
+    networks:
+        - app-network
 
 
   nginx:
     container_name: nginx_${APP_NAME}
     image: nginx:alpine
     ports:
-      - "127.0.0.1:80:80"
+      - "127.0.0.1:8080:80"
     volumes:
         - ./:/var/www:cached
         - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
@@ -49,7 +52,7 @@ services:
     container_name: db_${APP_NAME}
     image: postgis/postgis:13-3.1-alpine
     ports:
-      - "127.0.0.1:5432:5432"
+      - "5432:5432"
     environment:
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}

@@ -1,0 +1,198 @@
+---
+openapi: 3.0.2
+info:
+  title: Test API
+  version: 1.0.0
+paths:
+  /cars:
+    get:
+      tags:
+        - Cars
+      summary: List of available cars
+      parameters:
+        - in: query
+          name: car_model
+          description: id of car model
+          style: form
+          schema:
+            type: integer
+          required: false
+          allowEmptyValue: true
+          example: 1
+        - in: query
+          name: page
+          description: page number
+          style: form
+          schema:
+            type: integer
+            minimum: 1
+          required: false
+          allowEmptyValue: true
+          example: 1
+        - in: query
+          name: per_page
+          description: elements per page
+          style: form
+          schema:
+            type: integer
+            minimum: 1
+          required: false
+          allowEmptyValue: true
+          example: 10
+      responses:
+        200:
+          description: 200 code
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Car'
+  /cars/release:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - Cars
+      summary: Release the car currently in use
+      responses:
+        204:
+          $ref: '#/components/responses/204'
+  /cars/{car_id}/switch:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - Cars
+      summary: Use the new car and release the old one
+      parameters:
+        - name: car_id
+          in: path
+          required: true
+          description: Car id
+          schema:
+            type : integer
+            minimum: 1
+      responses:
+        204:
+          $ref: '#/components/responses/204'
+        403:
+          $ref: '#/components/responses/403'
+        404:
+          $ref: '#/components/responses/404'
+  /login:
+    post:
+      tags:
+        - Auth
+      summary: LogIn method
+      requestBody:
+        $ref: '#/components/requestBodies/Login'
+      responses:
+        200:
+          $ref: '#/components/responses/UserWithToken'
+        401:
+          $ref: '#/components/responses/401'
+  /me:
+    get:
+      tags:
+        - Auth
+      summary: Get authenticated user info
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          $ref: '#/components/responses/AuthenticatedUser'
+components:
+  schemas:
+    AuthenticatedUser:
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        car:
+          $ref: '#/components/schemas/SimpleCar'
+    UserWithTokenResource:
+      properties:
+        token:
+          type: string
+        user:
+          $ref: '#/components/schemas/UserResource'
+    UserResource:
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+    SimpleCar:
+      properties:
+        id:
+          type: integer
+        state_number:
+          type: string
+    Car:
+      properties:
+        id:
+          type: integer
+        state_number:
+          type: string
+        car_model:
+          $ref: '#/components/schemas/CarModelResource'
+    CarModelResource:
+      properties:
+        id:
+          type: integer
+        title:
+          type: integer
+        car_brand_id:
+          type: integer
+        car_brand:
+          $ref: '#/components/schemas/CarBrandResource'
+        cars:
+          allOf:
+            - $ref: '#/components/schemas/Car'
+          example: [{
+            id: 1,
+            state_number: 'А109КХ155'
+          }]
+    CarBrandResource:
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  responses:
+    204:
+      description: No content
+    401:
+      description: Unauthorized
+    403:
+      description: Forbidden
+    404:
+      description: Not found
+    AuthenticatedUser:
+      description: 'Authenticated user information'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AuthenticatedUser'
+    UserWithToken:
+      description: 'User with token'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserWithTokenResource'
+  requestBodies:
+    Login:
+      required: true
+      content:
+        application/json:
+          schema:
+            properties:
+              email:
+                type: string
+              password:
+                type: string
+...

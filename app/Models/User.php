@@ -14,6 +14,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string $email
  * @property string $password
  * @property Car $car
+ * @property UserCar $userCar
  */
 class User extends Authenticatable
 {
@@ -30,7 +31,14 @@ class User extends Authenticatable
 
     public function car(): HasOneThrough
     {
-        return $this->hasOneThrough(Car::class, UserCar::class);
+        return $this->hasOneThrough(
+            Car::class,
+            UserCar::class,
+            'user_id',
+            'id',
+            'id',
+            'car_id'
+        );
     }
 
     public function userCar(): HasOne

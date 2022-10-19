@@ -19,6 +19,7 @@ class UserCarService
     {
         $user->userCar()->updateOrCreate([
             'user_id' => $user->id,
+        ], [
             'car_id' => $car->id
         ]);
     }

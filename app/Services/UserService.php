@@ -15,4 +15,9 @@ class UserService
                 'password' => Hash::make($password),
             ]);
     }
+
+    public function findByEmail($email): ?User
+    {
+        return User::whereEmail($email)->first();
+    }
 }

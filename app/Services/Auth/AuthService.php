@@ -21,13 +21,29 @@ class AuthService
             return null;
         }
 
-        $token = $this->tokenFromUser($user);
-
-        return new UserWithTokenDto(user: $user, token: $token);
+        return $this->prepareUserTokenDto($user);
     }
 
     public function tokenFromUser(User $user): string
     {
         return $user->createToken('access_token')->plainTextToken;
+    }
+
+    public function registration(string $email, string $password): UserWithTokenDto
+    {
+        $user = $this->userService->create(
+            email: $email,
+            password: $password
+        );
+
+        return $this->prepareUserTokenDto($user);
+    }
+
+    private function prepareUserTokenDto(User $user): UserWithTokenDto
+    {
+        return new UserWithTokenDto(
+            user: $user,
+            token: $this->tokenFromUser($user),
+        );
     }
 }

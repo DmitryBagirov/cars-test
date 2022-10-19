@@ -90,6 +90,18 @@ paths:
           $ref: '#/components/responses/UserWithToken'
         401:
           $ref: '#/components/responses/401'
+  /registration:
+    post:
+      tags:
+        - Auth
+      summary: Registration
+      requestBody:
+        $ref: '#/components/requestBodies/Registration'
+      responses:
+        200:
+          $ref: '#/components/responses/UserWithToken'
+        422:
+          $ref: '#/components/responses/422'
   /me:
     get:
       tags:
@@ -172,6 +184,8 @@ components:
       description: Forbidden
     404:
       description: Not found
+    422:
+      description: Unprocessable entity
     AuthenticatedUser:
       description: 'Authenticated user information'
       content:
@@ -195,4 +209,15 @@ components:
                 type: string
               password:
                 type: string
+    Registration:
+      required: true
+      content:
+        application/json:
+          schema:
+            properties:
+              email:
+                type: string
+              password:
+                type: string
+                minimum: 5
 ...

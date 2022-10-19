@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RegistrationRequest;
 use App\Http\Resources\UserResource;
 use App\Services\Auth\AuthService;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -13,6 +14,19 @@ class AuthController extends Controller
     public function __construct(
         private readonly AuthService $authService,
     ) {
+    }
+
+    public function registration(RegistrationRequest $request): Response
+    {
+        $userWihTokenDto = $this->authService->registration(
+            email: $request->email,
+            password: $request->password,
+        );
+
+        return response()->json([
+            'user' => UserResource::make($userWihTokenDto->user),
+            'token' => $userWihTokenDto->token,
+        ]);
     }
 
     public function login(LoginRequest $request): Response

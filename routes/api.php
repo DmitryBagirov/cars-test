@@ -24,4 +24,5 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::post('login', [AuthController::class, 'login']);
+Route::post('registration', [AuthController::class, 'registration']);
 Route::get('cars', [CarsController::class, 'index']);

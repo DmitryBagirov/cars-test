@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CarsController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,10 +16,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('cars')->group(function () {
-        Route::get('', [CarsController::class, 'index']);
-        Route::prefix('{car}')->group(function () {
-            Route::post('use', [CarsController::class, 'use']);
-            Route::post('release', [CarsController::class, 'release']);
-        });
+        Route::post('release', [CarsController::class, 'release']);
+        Route::post('{car}/switch', [CarsController::class, 'switch']);
     });
 });
+
+Route::get('cars', [CarsController::class, 'index']);
